@@ -13,7 +13,7 @@
 
 // 定义应用目录
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With,Authorization,Content-Type,RetryAfter,retry-after,Accept, token");
+header("Access-Control-Allow-Headers: Origin, Reducemidel-Requested-With,Authorization,Content-Type,RetryAfter,retry-after,Accept, token");
 header('Access-Control-Allow-Methods: GET, POST, PUT,DELETE,OPTIONS');
 
 if ($_SERVER['REQUEST_METHOD']=='OPTIONS'){

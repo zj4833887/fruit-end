@@ -6,7 +6,7 @@ use think\Controller;
 use think\Db;
 use think\Request;
 
-class Index extends Controller
+class Category extends Controller
 {
     /**
      * 显示资源列表
@@ -15,34 +15,19 @@ class Index extends Controller
      */
     public function index()
     {
-
-        $cate=Db::table('category')->field('id,cname,thumb')->order('id','asc')
-            ->limit(0,4)->select();
-        $len=count($cate);
-        if($len){
-            for ($i=0;$i<$len;$i++){
-                $cid=$cate[$i]['id'];
-                $goods=Db::table('goods')->field('id,thumb,gname,sele,gmprice')
-                    ->where('cid',$cid)->limit(0,3)->select();
-                $cate[$i]['goods']=$goods;
-            }
-        }
-        if($len){
+        $result=Db::table('goods')->select();
+        if ($result) {
             return json([
-                'code'=>config('code.success'),
-                'msg'=>'商品获取成功',
-                'data'=>$cate,
+                'code' => config('code.success'),
+                'msg' => '数据获取成功',
+                'data'=>$result
+            ]);
+        } else {
+            return json([
+                'code' => config('code.fail'),
+                'msg' => '数据获取失败',
             ]);
         }
-        else{
-            return json([
-            'code'=>config('code.fail'),
-                'msg'=>'暂无数据',
-            ]);
-        }
-
-
-
         //
     }
 
@@ -75,17 +60,17 @@ class Index extends Controller
      */
     public function read($id)
     {
-        $request= Db::table('goods')->where('cid',$id)->select();
-        if ($request) {
+        $count=Db::table('category')->where('id',$id)->find();
+        if ($count) {
             return json([
                 'code' => config('code.success'),
-                'msg' => '商品查询成功',
-                'data' => $request,
+                'msg' => '标题获取成功',
+                'count'=>$count
             ]);
         } else {
             return json([
                 'code' => config('code.fail'),
-                'msg' => '商品查询失败',
+                'msg' => '标题获取失败',
             ]);
         }
         //

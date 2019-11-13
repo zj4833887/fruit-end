@@ -4,9 +4,10 @@ namespace app\index\controller;
 
 use think\Controller;
 use think\Db;
+use think\JWT;
 use think\Request;
 
-class Index extends Controller
+class Login extends Controller
 {
     /**
      * 显示资源列表
@@ -15,34 +16,6 @@ class Index extends Controller
      */
     public function index()
     {
-
-        $cate=Db::table('category')->field('id,cname,thumb')->order('id','asc')
-            ->limit(0,4)->select();
-        $len=count($cate);
-        if($len){
-            for ($i=0;$i<$len;$i++){
-                $cid=$cate[$i]['id'];
-                $goods=Db::table('goods')->field('id,thumb,gname,sele,gmprice')
-                    ->where('cid',$cid)->limit(0,3)->select();
-                $cate[$i]['goods']=$goods;
-            }
-        }
-        if($len){
-            return json([
-                'code'=>config('code.success'),
-                'msg'=>'商品获取成功',
-                'data'=>$cate,
-            ]);
-        }
-        else{
-            return json([
-            'code'=>config('code.fail'),
-                'msg'=>'暂无数据',
-            ]);
-        }
-
-
-
         //
     }
 
@@ -64,6 +37,31 @@ class Index extends Controller
      */
     public function save(Request $request)
     {
+//        nickname,password
+        $data=$this->request->post();
+        $username=$data['nickname'];
+        $password=crypt($data['password'], md5($data['password']));
+        $request=Db::table('users')->where("nickname|tel",$username)
+            ->where('password',$password)->find();
+
+//        $request= Db::table('users')->where($arr)->whereOr($tel)->find();
+        if ($request) {
+          $token = JWT::getToken([
+              'id'=>$request['id'],
+              'nickname'=>$request['nickname']
+          ],config('jwtkey'));
+            return json([
+                'code' => config('code.success'),
+                'msg' => '登录成功',
+                'token'=>$token,
+
+            ]);
+        } else {
+            return json([
+                'code' => config('code.fail'),
+                'msg' => '登录失败',
+            ]);
+        }
         //
     }
 
@@ -75,19 +73,6 @@ class Index extends Controller
      */
     public function read($id)
     {
-        $request= Db::table('goods')->where('cid',$id)->select();
-        if ($request) {
-            return json([
-                'code' => config('code.success'),
-                'msg' => '商品查询成功',
-                'data' => $request,
-            ]);
-        } else {
-            return json([
-                'code' => config('code.fail'),
-                'msg' => '商品查询失败',
-            ]);
-        }
         //
     }
 

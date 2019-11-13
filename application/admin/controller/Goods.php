@@ -125,13 +125,13 @@ class Goods extends Controller
         if ($request) {
             return json([
                 'code' => config('code.success'),
-                'msg' => '分类添加成功',
+                'msg' => '商品查询成功',
                 'data'=>$request,
             ]);
         } else {
             return json([
                 'code' => config('code.fail'),
-                'msg' => '分类添加失败',
+                'msg' => '商品查询失败',
             ]);
         }
     }

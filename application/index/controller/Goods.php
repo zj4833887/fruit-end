@@ -6,7 +6,7 @@ use think\Controller;
 use think\Db;
 use think\Request;
 
-class Index extends Controller
+class Goods extends Controller
 {
     /**
      * 显示资源列表
@@ -15,34 +15,43 @@ class Index extends Controller
      */
     public function index()
     {
+        $data=$this->request->get();
+        //验证cid
 
-        $cate=Db::table('category')->field('id,cname,thumb')->order('id','asc')
-            ->limit(0,4)->select();
-        $len=count($cate);
-        if($len){
-            for ($i=0;$i<$len;$i++){
-                $cid=$cate[$i]['id'];
-                $goods=Db::table('goods')->field('id,thumb,gname,sele,gmprice')
-                    ->where('cid',$cid)->limit(0,3)->select();
-                $cate[$i]['goods']=$goods;
-            }
+        if (isset($data['page'])&&!empty($data['page'])){
+            $page=$data['page'];
+        }else{
+            $page=1;
         }
-        if($len){
+        if (isset($data['limit'])&&!empty($data['limit'])){
+            $limit=$data['limit'];
+        }else{
+            $limit=2;
+        }
+        $id=$data['id'];
+        $request= Db::table('goods')
+            ->field('id,thumb,gname,gmprice,sele')
+            ->order('id','asc')->where('cid',$id)
+            ->paginate($limit,false,[
+                'page'=>$page,
+            ]);
+        $count=$request->total();
+        $goods=$request->items();
+
+//       print_r($request);
+        if ($count>0 && count($goods)>0) {
             return json([
-                'code'=>config('code.success'),
-                'msg'=>'商品获取成功',
-                'data'=>$cate,
+                'code' => config('code.success'),
+                'msg' => '分类商品查询成功',
+                'data' => $goods,
+                'count'=>$count,
+            ]);
+        } else {
+            return json([
+                'code' => config('code.fail'),
+                'msg' => '分类商品查询失败',
             ]);
         }
-        else{
-            return json([
-            'code'=>config('code.fail'),
-                'msg'=>'暂无数据',
-            ]);
-        }
-
-
-
         //
     }
 
@@ -53,6 +62,19 @@ class Index extends Controller
      */
     public function create()
     {
+        $request= Db::table('goods')->select();
+        if ($request) {
+            return json([
+                'code' => config('code.success'),
+                'msg' => '商品查询成功',
+                'data' => $request,
+            ]);
+        } else {
+            return json([
+                'code' => config('code.fail'),
+                'msg' => '商品查询失败',
+            ]);
+        }
         //
     }
 
@@ -75,7 +97,7 @@ class Index extends Controller
      */
     public function read($id)
     {
-        $request= Db::table('goods')->where('cid',$id)->select();
+        $request= Db::table('goods')->where('id',$id)->find();
         if ($request) {
             return json([
                 'code' => config('code.success'),
